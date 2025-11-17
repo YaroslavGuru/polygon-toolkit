@@ -1,57 +1,126 @@
-# Sample Hardhat 3 Beta Project (`node:test` and `viem`)
+# Polygon Toolkit - Hardhat 3 Project
 
-This project showcases a Hardhat 3 Beta project using the native Node.js test runner (`node:test`) and the `viem` library for Ethereum interactions.
-
-To learn more about the Hardhat 3 Beta, please visit the [Getting Started guide](https://hardhat.org/docs/getting-started#getting-started-with-hardhat-3). To share your feedback, join our [Hardhat 3 Beta](https://hardhat.org/hardhat3-beta-telegram-group) Telegram group or [open an issue](https://github.com/NomicFoundation/hardhat/issues/new) in our GitHub issue tracker.
+A comprehensive smart contract toolkit for Polygon Amoy testnet using Hardhat 3, viem, and TypeScript.
 
 ## Project Overview
 
-This example project includes:
+This project includes:
 
-- A simple Hardhat configuration file.
-- Foundry-compatible Solidity unit tests.
-- TypeScript integration tests using [`node:test`](nodejs.org/api/test.html), the new Node.js native test runner, and [`viem`](https://viem.sh/).
-- Examples demonstrating how to connect to different types of networks, including locally simulating OP mainnet.
+- **Smart Contracts**: ERC20, ERC721, ERC1155 token implementations and a simple Counter contract
+- **Hardhat 3** with TypeScript and viem integration
+- **TypeScript integration tests** using Node.js native test runner (`node:test`)
+- **Deployment scripts** for Polygon Amoy testnet
+- **OpenZeppelin Contracts** for secure, audited token implementations
+
+## Contracts
+
+- **Counter.sol**: Simple counter contract with increment/decrement functionality
+- **ERC20Token.sol**: ERC20 fungible token implementation
+- **ERC721Token.sol**: ERC721 non-fungible token (NFT) implementation
+- **ERC1155Token.sol**: ERC1155 multi-token standard implementation
+
+## Prerequisites
+
+- Node.js (v18 or higher)
+- npm or pnpm
+- A Polygon Amoy testnet RPC URL
+- A private key with testnet MATIC for deployment
+
+## Setup
+
+1. Clone the repository:
+```shell
+git clone git@github.com:YaroslavGuru/polygon-toolkit.git
+cd polygon-toolkit
+```
+
+2. Install dependencies:
+```shell
+npm install
+```
+
+3. Create a `.env` file in the root directory:
+```shell
+cp .env.example .env
+```
+
+4. Fill in your `.env` file with:
+```
+API_URL=https://rpc-amoy.polygon.technology
+PRIVATE_KEY=your_private_key_here
+POLYGONSCAN_API_KEY=your_polygonscan_api_key_here
+```
 
 ## Usage
 
+### Compile Contracts
+
+```shell
+npm run compile
+```
+
 ### Running Tests
 
-To run all the tests in the project, execute the following command:
-
+Run all tests:
 ```shell
-npx hardhat test
+npm test
 ```
 
-You can also selectively run the Solidity or `node:test` tests:
-
+Run only TypeScript/Node.js tests:
 ```shell
-npx hardhat test solidity
-npx hardhat test nodejs
+npm run test:nodejs
 ```
 
-### Make a deployment to Sepolia
+### Deploy Contracts
 
-This project includes an example Ignition module to deploy the contract. You can deploy this module to a locally simulated chain or to Sepolia.
-
-To run the deployment to a local chain:
-
+Deploy to Polygon Amoy:
 ```shell
-npx hardhat ignition deploy ignition/modules/Counter.ts
+npm run deploy
 ```
 
-To run the deployment to Sepolia, you need an account with funds to send the transaction. The provided Hardhat configuration includes a Configuration Variable called `SEPOLIA_PRIVATE_KEY`, which you can use to set the private key of the account you want to use.
-
-You can set the `SEPOLIA_PRIVATE_KEY` variable using the `hardhat-keystore` plugin or by setting it as an environment variable.
-
-To set the `SEPOLIA_PRIVATE_KEY` config variable using `hardhat-keystore`:
-
+Deploy locally (for testing):
 ```shell
-npx hardhat keystore set SEPOLIA_PRIVATE_KEY
+npm run deploy:local
 ```
 
-After setting the variable, you can run the deployment with the Sepolia network:
+### Verify Contracts
 
+After deployment, verify contracts on Polygonscan:
 ```shell
-npx hardhat ignition deploy --network sepolia ignition/modules/Counter.ts
+npm run verify <contract_address> <constructor_arg1> <constructor_arg2> ...
 ```
+
+Or use the verification commands provided in the deployment output.
+
+## Project Structure
+
+```
+polygon-toolkit/
+├── contracts/          # Smart contracts
+│   ├── Counter.sol
+│   ├── ERC20Token.sol
+│   ├── ERC721Token.sol
+│   └── ERC1155Token.sol
+├── scripts/            # Deployment scripts
+│   └── deploy-all.ts
+├── test/               # Test files
+│   ├── Counter.test.ts
+│   ├── ERC20.test.ts
+│   ├── ERC721.test.ts
+│   └── ERC1155.test.ts
+├── ignition/          # Hardhat Ignition modules
+│   └── modules/
+│       └── Counter.ts
+└── hardhat.config.ts  # Hardhat configuration
+```
+
+## Network Configuration
+
+The project is configured for **Polygon Amoy** testnet:
+- Chain ID: 80002
+- RPC URL: Configure via `API_URL` in `.env`
+- Explorer: https://amoy.polygonscan.com
+
+## License
+
+MIT

@@ -1,19 +1,18 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.28;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.27;
 
 contract Counter {
-  uint public x;
+    uint256 private number;
 
-  event Increment(uint by);
+    function increment() external {
+        number++;
+    }
 
-  function inc() public {
-    x++;
-    emit Increment(1);
-  }
+    function decrement() external {
+        number--;
+    }
 
-  function incBy(uint by) public {
-    require(by > 0, "incBy: increment should be positive");
-    x += by;
-    emit Increment(by);
-  }
+    function getNumber() external view returns (uint256) {
+        return number;
+    }
 }
