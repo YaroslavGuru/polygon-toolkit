@@ -50,6 +50,11 @@ dotenv.config();
 
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
+import "@openzeppelin/hardhat-upgrades";
+
+const AMOY_RPC_URL = process.env.AMOY_RPC_URL || "";
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
+const POLYGONSCAN_API_KEY = process.env.POLYGONSCAN_API_KEY || "";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -59,7 +64,6 @@ const config: HardhatUserConfig = {
     },
   },
 
-  // Local Hardhat network
   networks: {
     localhost: {
       url: "http://127.0.0.1:8545",
@@ -68,10 +72,28 @@ const config: HardhatUserConfig = {
     hardhat: {
       chainId: 31337,
     },
+    amoy: {
+      url: AMOY_RPC_URL || "https://rpc-amoy.polygon.technology",
+      accounts: PRIVATE_KEY ? [PRIVATE_KEY] : [],
+      chainId: 80002,
+    },
   },
 
-  // IMPORTANT: remove etherscan completely to avoid calling API on localhost
-  etherscan: undefined,
+  etherscan: {
+    apiKey: {
+      polygonAmoy: POLYGONSCAN_API_KEY,
+    },
+    customChains: [
+      {
+        network: "polygonAmoy",
+        chainId: 80002,
+        urls: {
+          apiURL: "https://api-amoy.polygonscan.com/api",
+          browserURL: "https://amoy.polygonscan.com",
+        },
+      },
+    ],
+  },
 };
 
 export default config;
