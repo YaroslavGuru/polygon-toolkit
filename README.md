@@ -24,6 +24,8 @@
 - [Project Structure](#-project-structure)
 - [Contract Details](#-contract-details)
 - [Upgradeable Contracts (UUPS)](#-upgradeable-contracts-uups-pattern)
+- [Staking Contract](#-staking-contract)
+- [Vesting Contract](#-vesting-contract)
 - [Usage Guide](#-usage-guide)
 - [Testing](#-testing)
 - [Security](#-security)
@@ -41,7 +43,9 @@ This project provides a complete toolkit for deploying and managing ERC20 tokens
 
 - ✅ **Standard ERC20 Token**: Simple, non-upgradeable token implementation
 - ✅ **Upgradeable ERC20 (UUPS)**: Production-ready upgradeable token with v1 and v2 implementations
-- ✅ **Comprehensive Testing**: 16+ tests covering all scenarios
+- ✅ **Staking Contract**: Production-grade staking with rewards, lock periods, and flexible APR
+- ✅ **Vesting Contract**: Secure token vesting with cliff periods and linear release
+- ✅ **Comprehensive Testing**: 40+ tests covering all scenarios
 - ✅ **Security First**: OpenZeppelin audited contracts with best practices
 - ✅ **Full Documentation**: Detailed guides and architecture documentation
 - ✅ **Deployment Scripts**: Ready-to-use scripts for deployment and upgrades
@@ -62,6 +66,22 @@ This project provides a complete toolkit for deploying and managing ERC20 tokens
 - 📦 **Storage Safety**: Automatic storage layout validation
 - 🧪 **Comprehensive Tests**: 16 tests covering all upgrade scenarios
 - 📈 **Version Management**: v1 and v2 implementations with safe upgrade path
+
+### Staking Contract (`StakingContract`)
+- 💰 **Token Staking**: Stake tokens to earn rewards over time
+- 📈 **Flexible APR**: Configurable reward rates (APR-based)
+- 🔒 **Lock Periods**: Optional lock periods for staked tokens
+- ⏱️ **Time-Based Rewards**: Per-second reward calculation
+- 🎁 **Reward Claiming**: Claim accumulated rewards anytime
+- 🛡️ **Security**: Reentrancy protection and safe token transfers
+
+### Vesting Contract (`VestingContract`)
+- 📅 **Linear Vesting**: Linear token release over time
+- ⏰ **Cliff Periods**: Optional cliff before vesting starts
+- 👥 **Multiple Beneficiaries**: Support for multiple vesting schedules
+- 🔐 **Beneficiary-Only Claims**: Secure claiming mechanism
+- 🚫 **Revocable**: Owner can revoke unvested tokens
+- 📊 **Transparent**: Full visibility into vesting schedules
 
 ### Developer Experience
 - 🛠️ **TypeScript Support**: Full type safety with TypeChain
@@ -135,16 +155,22 @@ polygon-toolkit/
 │   ├── YaroslavToken.sol              # Standard ERC20 token contract
 │   ├── UpgradeableERC20.sol           # Upgradeable ERC20 v1 (UUPS pattern)
 │   ├── UpgradeableERC20V2.sol         # Upgradeable ERC20 v2 (with new features)
+│   ├── StakingContract.sol            # Staking contract with rewards
+│   ├── VestingContract.sol            # Token vesting contract
 │   └── Lock.sol                       # Example contract (Hardhat template)
 │
 ├── scripts/                            # Deployment and utility scripts
 │   ├── deploy.ts                       # Deploy standard Yaroslav token
 │   ├── deploy-upgradeable.ts          # Deploy upgradeable ERC20 v1
 │   ├── upgrade-to-v2.ts               # Upgrade proxy from v1 to v2
+│   ├── deploy-staking.ts              # Deploy staking contract
+│   ├── deploy-vesting.ts               # Deploy vesting contract
 │   └── check.ts                        # Verify token deployment
 │
 ├── test/                               # Test files
 │   ├── upgrade.test.ts                 # Comprehensive upgrade tests (16 tests)
+│   ├── staking.test.ts                 # Staking contract tests (21 tests)
+│   ├── vesting.test.ts                 # Vesting contract tests (19 tests)
 │   └── Lock.ts                         # Example test (Hardhat template)
 │
 ├── docs/                               # Documentation
@@ -168,11 +194,15 @@ polygon-toolkit/
   - `YaroslavToken.sol`: Standard non-upgradeable ERC20 token
   - `UpgradeableERC20.sol`: Base upgradeable token (v1)
   - `UpgradeableERC20V2.sol`: Upgraded version with new features
+  - `StakingContract.sol`: Staking contract with rewards
+  - `VestingContract.sol`: Token vesting contract
 
 - **`scripts/`**: Deployment and management scripts
   - Standard token deployment
   - Upgradeable token deployment
   - Upgrade execution
+  - Staking contract deployment
+  - Vesting contract deployment
   - Token verification
 
 - **`test/`**: Comprehensive test suites
@@ -376,6 +406,217 @@ constructor() {
 
 ---
 
+## 💰 Staking Contract
+
+The `StakingContract` allows users to stake tokens and earn rewards over time with configurable APR and optional lock periods.
+
+### Features
+
+- **Token Staking**: Stake any ERC20 token to earn rewards
+- **Flexible Rewards**: Configurable APR (Annual Percentage Rate)
+- **Lock Periods**: Optional lock periods to prevent early withdrawal
+- **Time-Based Rewards**: Rewards calculated per second based on staked amount
+- **Secure Withdrawals**: Reentrancy protection and safe token transfers
+- **Owner Controls**: Owner can update reward rates and lock periods
+
+### Key Functions
+
+#### `stake(uint256 amount)`
+Stake tokens to start earning rewards.
+
+```solidity
+// Approve tokens first
+await token.approve(stakingContractAddress, amount);
+// Then stake
+await stakingContract.stake(amount);
+```
+
+#### `withdraw(uint256 amount)`
+Withdraw staked tokens (subject to lock period if set).
+
+```solidity
+await stakingContract.withdraw(amount);
+```
+
+#### `claimRewards()`
+Claim accumulated rewards.
+
+```solidity
+await stakingContract.claimRewards();
+```
+
+#### `getPendingReward(address user)`
+View pending rewards for any user.
+
+```solidity
+const pendingReward = await stakingContract.getPendingReward(userAddress);
+```
+
+### Reward Calculation
+
+Rewards are calculated using the formula:
+```
+reward = (stakedAmount × rewardRate × timeElapsed) / (PRECISION × SECONDS_PER_YEAR)
+```
+
+Where:
+- `rewardRate`: APR in wei (1e18 = 100%)
+- `timeElapsed`: Time since last update in seconds
+- `PRECISION`: 1e18
+
+### Deployment
+
+```bash
+npx hardhat run scripts/deploy-staking.ts --network localhost
+```
+
+**Environment Variables (optional):**
+- `STAKING_TOKEN_ADDRESS`: Token to stake (default: deploys new token)
+- `REWARD_TOKEN_ADDRESS`: Reward token (default: same as staking token)
+- `REWARD_RATE`: APR in wei (default: 0.1e18 = 10%)
+- `LOCK_PERIOD`: Lock period in seconds (default: 0 = no lock)
+
+### Example Usage
+
+```typescript
+// Deploy staking contract with 10% APR, 7-day lock
+const staking = await StakingContract.deploy(
+  tokenAddress,
+  tokenAddress, // Same token for rewards
+  ethers.parseUnits("0.1", 18), // 10% APR
+  7 * 24 * 60 * 60 // 7 days lock
+);
+
+// User stakes 1000 tokens
+await token.approve(stakingAddress, ethers.parseUnits("1000", 18));
+await staking.stake(ethers.parseUnits("1000", 18));
+
+// After 1 year, user can claim ~100 tokens in rewards
+await time.increase(365 * 24 * 60 * 60);
+await staking.claimRewards();
+```
+
+### Security Features
+
+- ✅ ReentrancyGuard protection
+- ✅ SafeERC20 for token transfers
+- ✅ Owner-only admin functions
+- ✅ Lock period enforcement
+- ✅ Zero amount validation
+
+---
+
+## 📅 Vesting Contract
+
+The `VestingContract` implements secure token vesting with linear release schedules, cliff periods, and beneficiary-only claims.
+
+### Features
+
+- **Linear Vesting**: Tokens released linearly over time
+- **Cliff Periods**: Optional cliff before vesting starts
+- **Multiple Schedules**: Support for multiple vesting schedules per beneficiary
+- **Beneficiary-Only Claims**: Only beneficiaries can claim their vested tokens
+- **Revocable**: Owner can revoke unvested tokens
+- **Transparent**: Full visibility into all vesting schedules
+
+### Key Functions
+
+#### `createVesting(address beneficiary, uint256 totalAmount, uint64 startTime, uint64 cliffDuration, uint64 vestingDuration)`
+Create a new vesting schedule.
+
+```solidity
+// Approve tokens first
+await token.approve(vestingContractAddress, amount);
+// Create vesting: 10,000 tokens, 30-day cliff, 1-year vesting
+await vestingContract.createVesting(
+  beneficiaryAddress,
+  ethers.parseUnits("10000", 18),
+  0, // Start now (0 = current time)
+  30 * 24 * 60 * 60, // 30 days cliff
+  365 * 24 * 60 * 60 // 1 year vesting
+);
+```
+
+#### `claim(bytes32 scheduleId)`
+Claim vested tokens for a specific schedule.
+
+```solidity
+await vestingContract.claim(scheduleId);
+```
+
+#### `claimAll()`
+Claim all available tokens across all schedules for the caller.
+
+```solidity
+await vestingContract.claimAll();
+```
+
+#### `getVestedAmount(bytes32 scheduleId)`
+Get the vested amount for a schedule.
+
+```solidity
+const vested = await vestingContract.getVestedAmount(scheduleId);
+```
+
+#### `getClaimableAmount(bytes32 scheduleId)`
+Get the claimable amount (vested - claimed) for a schedule.
+
+```solidity
+const claimable = await vestingContract.getClaimableAmount(scheduleId);
+```
+
+### Vesting Calculation
+
+Vested amount is calculated linearly:
+```
+vestedAmount = totalAmount × (timeElapsed / vestingDuration)
+```
+
+Where:
+- `timeElapsed`: Time since start (after cliff)
+- `vestingDuration`: Total vesting period
+
+### Deployment
+
+```bash
+npx hardhat run scripts/deploy-vesting.ts --network localhost
+```
+
+**Environment Variables (optional):**
+- `VESTING_TOKEN_ADDRESS`: Token to vest (default: deploys new token)
+
+### Example Usage
+
+```typescript
+// Deploy vesting contract
+const vesting = await VestingContract.deploy(tokenAddress);
+
+// Create vesting schedule
+await token.approve(vestingAddress, ethers.parseUnits("10000", 18));
+const tx = await vesting.createVesting(
+  beneficiaryAddress,
+  ethers.parseUnits("10000", 18),
+  0, // Start now
+  30 * 24 * 60 * 60, // 30 days cliff
+  365 * 24 * 60 * 60 // 1 year vesting
+);
+
+// After cliff, beneficiary can claim
+await time.increase(30 * 24 * 60 * 60 + 1);
+const scheduleId = await getScheduleIdFromTx(tx);
+await vesting.connect(beneficiary).claim(scheduleId);
+```
+
+### Security Features
+
+- ✅ ReentrancyGuard protection
+- ✅ SafeERC20 for token transfers
+- ✅ Beneficiary-only claims
+- ✅ Cliff period enforcement
+- ✅ Revocation support for unvested tokens
+
+---
+
 ## 🔧 Usage Guide
 
 ### Compile Contracts
@@ -406,6 +647,30 @@ npx hardhat run scripts/deploy-upgradeable.ts --network localhost
 **Polygon Amoy Testnet:**
 ```bash
 npx hardhat run scripts/deploy-upgradeable.ts --network amoy
+```
+
+### Deploy Staking Contract
+
+**Local Network:**
+```bash
+npx hardhat run scripts/deploy-staking.ts --network localhost
+```
+
+**With Custom Parameters:**
+```bash
+$env:STAKING_TOKEN_ADDRESS="0x..."; $env:REWARD_RATE="0.2e18"; npx hardhat run scripts/deploy-staking.ts --network localhost
+```
+
+### Deploy Vesting Contract
+
+**Local Network:**
+```bash
+npx hardhat run scripts/deploy-vesting.ts --network localhost
+```
+
+**With Custom Token:**
+```bash
+$env:VESTING_TOKEN_ADDRESS="0x..."; npx hardhat run scripts/deploy-vesting.ts --network localhost
 ```
 
 ### Upgrade to v2
@@ -466,7 +731,9 @@ REPORT_GAS=true npx hardhat test
 
 ### Test Coverage
 
-The upgradeable contracts include **16 comprehensive tests** covering:
+**Total Tests: 40+**
+
+#### Upgradeable Contracts (16 tests)
 
 - ✅ Deployment and initialization (4 tests)
 - ✅ ERC20 functionality (4 tests)
@@ -474,6 +741,23 @@ The upgradeable contracts include **16 comprehensive tests** covering:
 - ✅ Permission control (2 tests)
 - ✅ Storage safety (1 test)
 - ✅ Implementation verification (1 test)
+
+#### Staking Contract (21 tests)
+- ✅ Deployment and configuration
+- ✅ Staking functionality
+- ✅ Reward calculation and claiming
+- ✅ Withdrawal with and without locks
+- ✅ Admin functions
+- ✅ Edge cases
+
+#### Vesting Contract (19 tests)
+- ✅ Vesting schedule creation
+- ✅ Cliff period enforcement
+- ✅ Linear vesting calculations
+- ✅ Claiming functionality
+- ✅ Multiple beneficiaries
+- ✅ Revocation
+- ✅ Edge cases
 
 **All tests passing** ✅
 
