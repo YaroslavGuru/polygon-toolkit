@@ -1,0 +1,35 @@
+{
+  "network": "Polygon Amoy Testnet",
+  "chainId": 80002,
+  "deployments": {
+    "YaroslavToken": {
+      "address": "",
+      "deployedAt": "",
+      "blockNumber": 0,
+      "transactionHash": ""
+    },
+    "UpgradeableERC20": {
+      "proxyAddress": "",
+      "implementationAddress": "",
+      "deployedAt": "",
+      "blockNumber": 0,
+      "transactionHash": ""
+    },
+    "StakingContract": {
+      "address": "",
+      "stakingToken": "",
+      "rewardToken": "",
+      "deployedAt": "",
+      "blockNumber": 0,
+      "transactionHash": ""
+    },
+    "VestingContract": {
+      "address": "",
+      "vestingToken": "",
+      "deployedAt": "",
+      "blockNumber": 0,
+      "transactionHash": ""
+    }
+  }
+}
+

@@ -709,6 +709,167 @@ npx hardhat run scripts/deploy.ts --network localhost
 
 ---
 
+## 🌐 Testnet & Mainnet Deployment
+
+> 📖 **For detailed deployment instructions, see [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)**
+
+### Prerequisites
+
+1. **Environment Setup**
+   - Create a `.env` file in the project root
+   - Add the following variables:
+     ```env
+     PRIVATE_KEY=your_private_key_without_0x_prefix
+     POLYGON_AMOY_RPC_URL=https://polygon-amoy.g.alchemy.com/v2/YOUR_API_KEY
+     POLYGON_MAINNET_RPC_URL=https://polygon-mainnet.g.alchemy.com/v2/YOUR_API_KEY
+     POLYGONSCAN_API_KEY=your_polygonscan_api_key
+     ```
+
+2. **Get RPC URLs**
+   - **Alchemy**: https://www.alchemy.com/ (Free tier available)
+   - **Infura**: https://infura.io/ (Free tier available)
+   - **Public RPC**: Can use public endpoints (less reliable)
+
+3. **Get Polygonscan API Key**
+   - Visit: https://polygonscan.com/apis
+   - Create account and generate API key
+
+4. **Fund Your Wallet**
+   - **Amoy Testnet**: Get free testnet tokens (POL/MATIC) from https://faucet.polygon.technology/
+   - **Polygon Mainnet**: Purchase MATIC from exchanges
+
+### Deploy to Polygon Amoy Testnet
+
+Deploy all contracts to testnet:
+
+```bash
+npx hardhat run scripts/deploy-to-testnet.ts --network amoy
+```
+
+This script deploys:
+- ✅ YaroslavToken (standard ERC20)
+- ✅ UpgradeableERC20 (with UUPS proxy)
+- ✅ StakingContract
+- ✅ VestingContract
+
+**What happens:**
+1. Contracts are deployed to Amoy testnet
+2. Deployment addresses are saved to `addresses/amoy.json`
+3. Transaction hashes and block numbers are recorded
+4. Polygonscan links are provided
+
+### Deploy to Polygon Mainnet
+
+⚠️ **WARNING**: This uses REAL MATIC on Polygon Mainnet!
+
+Deploy a simple contract to mainnet:
+
+```bash
+npx hardhat run scripts/deploy-to-mainnet.ts --network polygon
+```
+
+This script deploys:
+- ✅ YaroslavToken (standard ERC20)
+
+**Before deploying to mainnet:**
+- ✅ Test thoroughly on testnet first
+- ✅ Ensure you have sufficient MATIC for gas
+- ✅ Double-check all parameters
+- ✅ Understand the contract you're deploying
+
+### Verify Contracts on Polygonscan
+
+After deployment, verify contracts on Polygonscan:
+
+```bash
+# Verify testnet contracts
+npx hardhat run scripts/verify-contracts.ts --network amoy
+
+# Verify mainnet contracts
+npx hardhat run scripts/verify-contracts.ts --network polygon
+```
+
+**Manual Verification:**
+
+You can also verify contracts manually:
+
+```bash
+# Verify YaroslavToken
+npx hardhat verify --network amoy <CONTRACT_ADDRESS> <INITIAL_SUPPLY>
+
+# Verify StakingContract
+npx hardhat verify --network amoy <STAKING_ADDRESS> <STAKING_TOKEN> <REWARD_TOKEN> <REWARD_RATE> <LOCK_PERIOD>
+
+# Verify VestingContract
+npx hardhat verify --network amoy <VESTING_ADDRESS> <VESTING_TOKEN>
+```
+
+### Deployment Addresses
+
+Deployment addresses are automatically saved to:
+- `addresses/amoy.json` - Polygon Amoy testnet deployments
+- `addresses/mainnet.json` - Polygon Mainnet deployments
+
+**Example structure:**
+```json
+{
+  "network": "Polygon Amoy Testnet",
+  "chainId": 80002,
+  "deployedAt": "2024-01-01T00:00:00.000Z",
+  "deployer": "0x...",
+  "deployments": {
+    "YaroslavToken": {
+      "address": "0x...",
+      "transactionHash": "0x...",
+      "blockNumber": 12345
+    }
+  }
+}
+```
+
+### Deployment Checklist
+
+Before deploying:
+
+- [ ] Environment variables configured in `.env`
+- [ ] Wallet funded with sufficient POL (testnet) or MATIC (mainnet)
+- [ ] Contracts tested locally
+- [ ] Contracts tested on testnet (for mainnet)
+- [ ] Polygonscan API key configured
+- [ ] Deployment scripts reviewed
+
+After deploying:
+
+- [ ] Contracts verified on Polygonscan
+- [ ] Deployment addresses documented
+- [ ] README updated with addresses
+- [ ] Contracts tested on deployed network
+
+### Network Information
+
+| Network | Chain ID | RPC URL | Explorer |
+|---------|----------|---------|----------|
+| Polygon Amoy | 80002 | https://rpc-amoy.polygon.technology | https://amoy.polygonscan.com |
+| Polygon Mainnet | 137 | https://polygon-rpc.com | https://polygonscan.com |
+
+### Gas Optimization
+
+For production deployments, consider:
+- Using gas price oracles
+- Setting appropriate gas limits
+- Monitoring gas prices before deployment
+- Using EIP-1559 transactions
+
+### Security Best Practices
+
+1. **Never commit `.env` file** - It's in `.gitignore`
+2. **Use separate wallets** - Don't use main wallet for deployments
+3. **Test on testnet first** - Always test before mainnet
+4. **Verify contracts** - Make source code public on Polygonscan
+5. **Document everything** - Keep deployment records
+
+---
+
 ## 🧪 Testing
 
 ### Run All Tests

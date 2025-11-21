@@ -1,0 +1,13 @@
+{
+  "network": "Polygon Mainnet",
+  "chainId": 137,
+  "deployments": {
+    "YaroslavToken": {
+      "address": "",
+      "deployedAt": "",
+      "blockNumber": 0,
+      "transactionHash": ""
+    }
+  }
+}
+
